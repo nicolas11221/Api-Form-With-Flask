@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, url_for, redirect, flash
+from flask import Flask, render_template, request, url_for, redirect, flash, jsonify
 
 #Importamos La Base De Datos
 from flask_mysqldb import MySQL
@@ -28,6 +28,28 @@ def Index():
     return render_template('index.html', contacts = data)
 
 
+#GET
+@app.route('/getContacto')
+def getContactos():
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM contacts')
+    data = cur.fetchall()
+    print(data)
+    return jsonify({"": data})
+
+@app.route('/getContacto/<string:full_name>')
+def getContacto(full_name):
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM contacts')
+    data = cur.fetchall()
+    print(data)
+
+    # contactsFound = [contact for contact in contacts if contact['full_name'] == full_name]
+    # if (len(contactsFound) > 0):
+    #     return jsonify({"Product": contactsFound[0]})
+    # return jsonify({"message": "Product Not Found"})
+
+
 @app.route('/add', methods=['POST'])
 def Contact():
     if request.method == 'POST':
@@ -42,12 +64,16 @@ def Contact():
         return redirect(url_for('Index'))
         
 
+
+
 @app.route('/edit/<id>')
 def EditContact(id):
     cur = mysql.connection.cursor()
     cur.execute('SELECT * FROM contacts WHERE id = %s', (id))
     data = cur.fetchall()
     return render_template('editContact.html', contact = data[0])
+
+
 
 
 @app.route('/update/<id>', methods = ['POST'])
